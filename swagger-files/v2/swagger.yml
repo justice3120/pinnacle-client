@@ -1,0 +1,129 @@
+swagger: '2.0'
+info:
+  title: Pinnacle API
+  version: "2.0.0"
+host: api.pinnacle.com
+schemes:
+  - https
+basePath: /v2
+produces:
+  - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
+    description: HTTP Basic Authentication. Works over `HTTP` and `HTTPS`.
+security:
+  - basicAuth: []
+paths:
+  /sports:
+    get:
+      summary: Returns all sports with the status whether they currently have lines or not.
+      responses:
+        200:
+          description: Array of Sport type
+          schema:
+            $ref: '#/definitions/GetSportsResponse'
+  /leagues:
+    get:
+      summary: Returns all sports leagues with the status whether they currently have lines or not.
+      parameters:
+        - name: sportId
+          in: query
+          description: Sport id for which the leagues are requested
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Leagues container
+          schema:
+            $ref: '#/definitions/GetLeaguesResponse'
+  /currencies:
+    get:
+      summary: Returns the list of supported currencies
+      responses:
+        200:
+          description: Currencies container
+          schema:
+            $ref: '#/definitions/GetCurrenciesResponse'
+definitions:
+  GetSportsResponse:
+    type: object
+    properties:
+      sports:
+        type: array
+        items:
+          $ref: '#/definitions/Sport'
+  Sport:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Sport Id
+      name:
+        type: string
+        description: Sport name
+      hasOfferings:
+        type: boolean
+        description: Whether the sport currently has events
+      leagueSpecialsCount:
+        type: integer
+        description: Indicates how many specials are in the given sport.
+      eventSpecialsCount:
+        type: integer
+        description: Indicates how many game specials are in the given sport.
+      eventCount:
+        type: integer
+        description: Indicates how many games are in the given sport.
+  GetLeaguesResponse:
+    type: object
+    properties:
+      leagues:
+        type: array
+        items:
+          $ref: '#/definitions/League'
+  League:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: League Id
+      name:
+        type: string
+        description: League name
+      homeTeamType:
+        type: string
+        description: Specifies whether the home team is team1 or team2. You need this information to place a bet
+      hasOfferings:
+        type: boolean
+        description: Whether the league currently has events
+      allowRoundRobins:
+        type: boolean
+        description: Specifies whether you can place parlay round robins on events in this league
+      leagueSpecialsCount:
+        type: integer
+        description: Indicates how many specials are in the given league.
+      eventSpecialsCount:
+        type: integer
+        description: Indicates how many game special counts are in the given league.
+      eventCount:
+        type: integer
+        description: Indicates how many games are in the given league.
+  GetCurrenciesResponse:
+    type: object
+    properties:
+      currencies:
+        type: array
+        items:
+          $ref: '#/definitions/Currency'
+  Currency:
+    type: object
+    properties:
+      code:
+        type: string
+        description: Currency code
+      name:
+        type: string
+        description: Currency name
+      rate:
+        type: number
+        description: Exchange rate to USD
