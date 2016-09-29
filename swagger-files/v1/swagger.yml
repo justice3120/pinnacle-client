@@ -24,7 +24,7 @@ paths:
         Please note that it is possible to receive the same exact response when using "since" parameter.
         This is rare and can be caused by internal updates of event's properties.
       tags:
-        - name: Fixture
+        - Fixture
       parameters:
         - name: sportId
           in: query
@@ -53,27 +53,44 @@ paths:
           required: false
           type: integer
           format: int32
+          enum:
+            - 0
+            - 1
       responses:
         200:
-          description: Array of Sport type
+          description: ""
           schema:
             $ref: '#/definitions/GetFixturesResponse'
   /fixtures/settled:
     get:
       summary: Returns fixtures settled in the last 24 hours
       tags:
-        - name: Fixture
+        - Fixture
       parameters:
         - name: sportId
           in: query
-          description: Sport id for which the leagues are requested
+          description: The sport id for which to retrieve the fixutres
           required: true
           type: integer
+          format: int32
+        - name: leagueIds
+          in: query
+          description: The leagueIds array may contain a list of comma separated league ids
+          required: false
+          type: string
+        - name: since
+          in: query
+          description: |
+            This is used to receive incremental updates. Use the value of last from previous fixtures response.
+            When since parameter is not provided, the fixtures are delayed up to 1 min to encourage the use of the parameter
+          required: false
+          type: integer
+          format: int64
       responses:
         200:
-          description: Array of Sport type
+          description: ""
           schema:
-            $ref: '#/definitions/SportList'
+            $ref: '#/definitions/GetFixturesResponse'
   /fixtures/special:
     get:
       summary: Returns all non-settled specials (contests).
@@ -83,34 +100,79 @@ paths:
         Please note that it is possible to receive the same exact response when using "since" parameter.
         This is rare and can be caused by internal updates of event's properties.
       tags:
-        - name: Fixture
+        - Fixture
       parameters:
         - name: sportId
           in: query
-          description: Sport id for which the leagues are requested
+          description: The sport id for which to retrieve the fixutres
           required: true
           type: integer
+          format: int32
+        - name: leagueIds
+          in: query
+          description: The leagueIds array may contain a list of comma separated league ids
+          required: false
+          type: string
+        - name: category
+          in: query
+          description: Category of the special
+          required: false
+          type: string
+        - name: eventId
+          in: query
+          description: Event id of the linked event
+          required: false
+          type: integer
+          format: int64
+        - name: specialId
+          in: query
+          description: Specific special Id
+          required: false
+          type: integer
+          format: int64
+        - name: since
+          in: query
+          description: |
+            This is used to receive incremental updates. Use the value of last from previous fixtures response.
+            When since parameter is not provided, the fixtures are delayed up to 1 min to encourage the use of the parameter
+          required: false
+          type: integer
+          format: int64
       responses:
         200:
-          description: Array of Sport type
+          description: ""
           schema:
-            $ref: '#/definitions/SportList'
+            $ref: '#/definitions/GetFixturesResponse'
   /fixtures/special/settled:
     get:
       summary: Returns special fixtures settled in the last 24 hours
       tags:
-        - name: Fixture
+        - Fixture
       parameters:
         - name: sportId
           in: query
-          description: Sport id for which the leagues are requested
+          description: The sport id for which to retrieve the fixutres
           required: true
           type: integer
+          format: int32
+        - name: leagueIds
+          in: query
+          description: The leagueIds array may contain a list of comma separated league ids
+          required: false
+          type: string
+        - name: since
+          in: query
+          description: |
+            This is used to receive incremental updates. Use the value of last from previous fixtures response.
+            When since parameter is not provided, the fixtures are delayed up to 1 min to encourage the use of the parameter
+          required: false
+          type: integer
+          format: int64
       responses:
         200:
-          description: Array of Sport type
+          description: ""
           schema:
-            $ref: '#/definitions/SportList'
+            $ref: '#/definitions/GetFixturesResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -144,13 +206,49 @@ definitions:
     type: object
     properties:
       id:
-
+        type: integer
+        format: int64
+        description: Event ID
       starts:
+        type: string
+        format: date-time
+        description: Start time of the event in UTC
       home:
+        type: string
+        description: Home team name
       away:
+        type: string
+        description: Away team name
       rotNum:
+        type: string
+        description: Team1 rotation number
       liveStatus:
+        type: integer
+        format: int32
+        required: false
+        description: Indicates event’s live status
+        enum:
+          - 0
+          - 1
+          - 2
       status:
+        type: string
+        description: Status of the event
+        enum:
+          - H
+          - I
+          - O
       parlayRestriction:
+        type: integer
+        format: int32
+        description: Parlay status of the event
+        enum:
+          - 0
+          - 1
+          - 2
       homePitcher:
+        type: string
+        description: Home team pitcher. Only for baseball.
       awayPitcher:
+        type: string
+        description: Away team pitcher. Only for baseball.
