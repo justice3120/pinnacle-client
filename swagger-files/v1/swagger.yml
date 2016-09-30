@@ -145,7 +145,7 @@ paths:
         200:
           description: ""
           schema:
-            $ref: '#/definitions/GetFixturesResponse'
+            $ref: '#/definitions/GetSpecialFixturesResponse'
   /fixtures/special/settled:
     get:
       summary: Returns special fixtures settled in the last 24 hours
@@ -209,6 +209,22 @@ definitions:
         description: Contains a list of Leagues
         items:
           $ref: '#/definitions/League'
+  GetSpecialFixturesResponse:
+    type: object
+    properties:
+      sportId:
+        type: integer
+        format: int32
+        description: Same as requested sport Id
+      last:
+        type: integer
+        format: int64
+        description: Use this value for the subsequent requests for since query parameter to get just the changes since previous response
+      leagues:
+        type: array
+        description: Contains a list of Special Leagues
+        items:
+          $ref: '#/definitions/SpecialLeague'
   League:
     type: object
     properties:
@@ -221,6 +237,18 @@ definitions:
         description: Contains a list of events
         items:
           $ref: '#/definitions/Event'
+  SpecialLeague:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: League ID
+      specials:
+        type: array
+        description: Contains a list of specials
+        items:
+          $ref: '#/definitions/Special'
   Event:
     type: object
     properties:
@@ -290,6 +318,50 @@ definitions:
         description: Contains a list of periods
         items:
           $ref: '#/definitions/Period'
+  Special:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: Special ID
+      betType:
+        type: string
+        description: SPREAD
+      name:
+        type: string
+        description: Special name
+      date:
+        type: string
+        format: date-time
+        description: Creation date and time of the special in UTC
+      cutoff:
+        type: string
+        format: date-time
+        description: Start time of the special in UTC
+      category:
+        type: string
+        description: Category under which the special is recorded
+      units:
+        type: string
+        description: Measurement in the context of the special. Applicable to Spread and Over/Under special bet types. For hockey specials this could be "goals"
+      status:
+        type: string
+        description: |
+          Status of the special
+
+          * `H` - This status indicates that the lines are temporarily unavailable for betting.
+          * `I` - This status indicates that one or more lines have a red circle (a lower maximum bet amount).
+          * `O` - This is the starting status of a game. It means that the lines are open for betting.
+        enum:
+          - H
+          - I
+          - O
+      contestants:
+        type: array
+        description: List of contestants
+        items:
+          $ref: '#/definitions/Contestant'
   Period:
     type: object
     properties:
@@ -336,3 +408,17 @@ definitions:
         type: integer
         format: int32
         description: Team2 score
+  Contestant:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        description: Contestant ID
+      name:
+        type: string
+        description: Contestant name
+      rotNum:
+        type: integer
+        format: int32
+        description: Rotation number
