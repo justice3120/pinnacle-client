@@ -225,7 +225,6 @@ definitions:
       liveStatus:
         type: integer
         format: int32
-        required: false
         description: Indicates event’s live status
         enum:
           - 0
