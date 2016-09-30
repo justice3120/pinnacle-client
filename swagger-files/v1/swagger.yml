@@ -50,6 +50,9 @@ paths:
           description: |
             To retrieve ONLY live events set the value to islive =1.
             Any other value will result in retrieval of events regardless of their Live status
+
+            * `0` - False
+            * `1` - True
           required: false
           type: integer
           format: int32
@@ -90,7 +93,7 @@ paths:
         200:
           description: ""
           schema:
-            $ref: '#/definitions/GetFixturesResponse'
+            $ref: '#/definitions/GetSettledFixturesResponse'
   /fixtures/special:
     get:
       summary: Returns all non-settled specials (contests).
@@ -190,6 +193,22 @@ definitions:
         description: Contains a list of Leagues
         items:
           $ref: '#/definitions/League'
+  GetSettledFixturesResponse:
+    type: object
+    properties:
+      sportId:
+        type: integer
+        format: int32
+        description: Same as requested sport Id
+      last:
+        type: integer
+        format: int64
+        description: Use this value for the subsequent requests for since query parameter to get just the changes `since` previous response
+      league:
+        type: array
+        description: Contains a list of Leagues
+        items:
+          $ref: '#/definitions/League'
   League:
     type: object
     properties:
@@ -225,14 +244,24 @@ definitions:
       liveStatus:
         type: integer
         format: int32
-        description: Indicates event’s live status
+        description: |
+          Indicates event’s live status
+
+          * `0` - No live betting will be offered on this event.
+          * `1` - Live betting event.
+          * `2` - Live betting will be offered on this event.
         enum:
           - 0
           - 1
           - 2
       status:
         type: string
-        description: Status of the event
+        description: |
+          Status of the event
+
+          * `H` - This status indicates that the lines are temporarily unavailable for betting.
+          * `I` - This status indicates that one or more lines have a red circle (a lower maximum bet amount).
+          * `O` - This is the starting status of a game. It means that the lines are open for betting.
         enum:
           - H
           - I
@@ -240,7 +269,12 @@ definitions:
       parlayRestriction:
         type: integer
         format: int32
-        description: Parlay status of the event
+        description: |
+          Parlay status of the event
+
+          * `0` - Allowed to parlay, without restrictions.
+          * `1` - Not allowed to parlay this event.
+          * `2` - Allowed to parlay, with the restrictions. You can not have more than one leg from the same event in the parlay. All events with the same rot number are treated as the same event.
         enum:
           - 0
           - 1
@@ -251,3 +285,54 @@ definitions:
       awayPitcher:
         type: string
         description: Away team pitcher. Only for baseball.
+      periods:
+        type: array
+        description: Contains a list of periods
+        items:
+          $ref: '#/definitions/Period'
+  Period:
+    type: object
+    properties:
+      number:
+        type: integer
+        format: int32
+        description: |
+          This represents the period of the match. For example, for soccer we have:
+
+          * `0` - Game
+          * `1` - 1st Half
+          * `2` - 2nd Half
+      settlementId:
+        type: integer
+        format: int64
+        description: |
+          Unique id of the settlement. In case of a re-settlement, a new settlementId and settledAt will be generated.
+      settledAt:
+        type: string
+        format: date-time
+        description: Date and time when teh period was settled
+      status:
+        type: integer
+        format: int32
+        description: |
+          Period settlement status
+
+          * `1` - Event period is settled
+          * `2` - Event period is re-settled
+          * `3` - Event period is cancelled
+          * `4` - Event period is re-settled as cancelled
+          * `5` - Event is deleted
+        enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+      team1Score:
+        type: integer
+        format: int32
+        description: Team1 score
+      team2Score:
+        type: integer
+        format: int32
+        description: Team2 score

@@ -18,6 +18,8 @@ paths:
   /sports:
     get:
       summary: Returns all sports with the status whether they currently have lines or not.
+      tags:
+        - Sport
       responses:
         200:
           description: Array of Sport type
@@ -26,6 +28,8 @@ paths:
   /leagues:
     get:
       summary: Returns all sports leagues with the status whether they currently have lines or not.
+      tags:
+        - League
       parameters:
         - name: sportId
           in: query
@@ -41,6 +45,8 @@ paths:
   /currencies:
     get:
       summary: Returns the list of supported currencies
+      tags:
+        - Currency
       responses:
         200:
           description: Currencies container
