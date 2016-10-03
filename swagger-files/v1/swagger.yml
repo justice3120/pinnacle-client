@@ -114,6 +114,7 @@ paths:
         This is rare and can be caused by internal updates of event's properties.
       tags:
         - Fixture
+        - Special
       parameters:
         - name: sportId
           in: query
@@ -165,6 +166,7 @@ paths:
       summary: Returns special fixtures settled in the last 24 hours
       tags:
         - Fixture
+        - Special
       parameters:
         - name: sportId
           in: query
@@ -284,6 +286,7 @@ paths:
       summary: Returns odds for specified teaser.
       tags:
         - Odds
+        - Teaser
       parameters:
         - name: teaserId
           in: query
@@ -306,6 +309,7 @@ paths:
         This happens when the odds have not been set for the event.
       tags:
         - Odds
+        - Special
       parameters:
         - name: sportId
           in: query
@@ -462,6 +466,7 @@ paths:
       summary: Returns parlay lines and calculate odds. Supports JSON format only.
       tags:
         - Line
+        - Parlay
       parameters:
         - name: body
           in: body
@@ -551,6 +556,7 @@ paths:
       summary: Validates a teaser bet prior to submission. Returns bet limit and price on success.
       tags:
         - Line
+        - Teaser
       parameters:
         - name: body
           in: body
@@ -642,6 +648,7 @@ paths:
       summary: Returns latest special line.
       tags:
         - Line
+        - Special
       parameters:
         - name: specialId
           in: query
@@ -1450,6 +1457,170 @@ definitions:
         type: string
         format: date-time
         description: Line is effective as of this date and time
+  GetParlayLinesResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: |
+          Indicates whether the teaser is valid or not.
+
+          * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+          * `VALID` - Teaser is valid.
+        enum:
+          - PROCESSED_WITH_ERROR
+          - VALID
+      error:
+        type: string
+        description: |
+          If Status is PROCESSED_WITH_ERROR , error will be in the response
+
+          * `ABOVE_MAX_BET_AMOUNT` - Stake is above allowed maximum amount
+          * `ALL_BETTING_CLOSED` - Betting is not allowed at this moment
+          * `BELOW_MIN_BET_AMOUNT` - Stake is below allowed minimum amount
+          * `BLOCKED_BETTING` - Customer is an agent
+          * `BLOCKED_CLIENT` - Client is no longer active
+          * `INSUFFICIENT_FUNDS` - Bet is submitted by a client with insufficient funds
+          * `INVALID_COUNTRY` - Client country is not allowed for betting
+          * `INVALID_LEGS` - One or more legs are invalid
+          * `INVALID_ODDS_FORMAT` - If a bet was submitted with the odds format that is not allowed for the client
+          * `INVALID_ROUND_ROBIN_OPTIONS` - Round robin options are invalid (i.e. does not match with number of legs)
+          * `ROUND_ROBIN_DISALLOWED` - Round robin is disallowed for one of the leagues
+          * `TOO_MANY_LEGS` - Maximum of 10 legs can be specified
+          * `TOO_FEW_LEGS` - At least 2 legs are required for Parlay
+        enum:
+          - ABOVE_MAX_BET_AMOUNT
+          - ALL_BETTING_CLOSED
+          - BELOW_MIN_BET_AMOUNT
+          - BLOCKED_BETTING
+          - BLOCKED_CLIENT
+          - INSUFFICIENT_FUNDS
+          - INVALID_COUNTRY
+          - INVALID_LEGS
+          - INVALID_ODDS_FORMAT
+          - INVALID_ROUND_ROBIN_OPTIONS
+          - ROUND_ROBIN_DISALLOWED
+          - TOO_MANY_LEGS
+          - TOO_FEW_LEGS
+      maxRiskStake:
+        type: number
+        format: float
+        description: Minimum bet amount for WIN_RISK_TYPE.RISK.
+      minRiskStake:
+        type: number
+        format: float
+        description: Maximum bet amount for WIN_RISK_TYPE.RISK.
+      roundRobinOptionWithOdds:
+        type: array
+        description: |
+          Provides array with all acceptable Round Robin options with parlay odds for that option
+        items:
+          type: object
+          properties:
+            RoundRobinOption:
+              type: string
+              description: |
+                Round Robin option
+
+                * `Parlay` - Single parlay that include all wagers (No Round Robin)
+                * `TwoLegRoundRobin` - Multiple parlays having 2 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                * `ThreeLegRoundRobin` - Multiple parlays having 3 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                * `FourLegRoundRobin` - Multiple parlays having 4 wagers each (round robin style). Can be used if number of legs is greater or equal to 4
+                * `FiveLegRoundRobin` - Multiple parlays having 5 wagers each (round robin style). Can be used if number of legs is greater or equal to 5
+                * `SixLegRoundRobin` - Multiple parlays having 6 wagers each (round robin style). Can be used if number of legs is greater or equal to 6
+                * `SevenLegRoundRobin` - Multiple parlays having 7 wagers each (round robin style). Can be used if number of legs is greater or equal to 7
+                * `EightLegRoundRobin` - Multiple parlays having 8 wagers each (round robin style). Can be used if number of legs is  equal to 8
+              enum:
+                - Parlay
+                - TwoLegRoundRobin
+                - ThreeLegRoundRobin
+                - FourLegRoundRobin
+                - FiveLegRoundRobin
+                - SixLegRoundRobin
+                - SevenLegRoundRobin
+                - EightLegRoundRobin
+            Odds:
+              type: number
+              format: float
+              description: Odds for Round Robin option in requested Odds forma
+      legs:
+        type: array
+        description: Collection of Leg.
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Indicates whether the teaser is valid or not.
+
+                * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+                * `VALID` - Teaser is valid.
+              enum:
+                - PROCESSED_WITH_ERROR
+                - VALID
+            errorCode:
+              type: string
+              description: |
+                If Status is PROCESSED_WITH_ERROR, errorCode will be in the response
+
+                * `CANNOT_PARLAY_LIVE_GAME` - The wager is placed on Live game
+                * `CORRELATED` - The leg is correlated with another one
+                * `EVENT_NO_LONGER_AVAILABLE_FOR_BETTING` - The event is no longer offered for Parlays
+                * `EVENT_NOT_OFFERED_FOR_PARLAY` - The event is not offered for Parlays
+                * `INVALID_EVENT` - Live betting is not allowed at this moment
+                * `INVALID_LEG_BET_TYPE` - Leg bet type is not accepted for Parlays, Accepted values are: SPREAD, MONEYLINE, TOTAL_POINTS
+                * `INVALID_PARLAY_BET` - The leg did not validated due to error on Parlay Bet. Check the error PlaceParlayBet response for error details
+                * `LINE_CHANGED` - Bet is submitted on a line that has changed
+                * `LINE_DOES_NOT_BELONG_TO_EVENT` - LineId does not match the EventId specified in the request
+                * `LISTED_PITCHERS_SELECTION_ERROR` - If bet was submitted with pitcher1MustStart and/or pitcher2MustStart parameters with values that are not allowed
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_1` - Due to line change odds are not offered for Parlay anymore
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_2` - Due to line change odds are not offered for Parlay anymore
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_3` - Due to line change odds are not offered for Parlay anymore
+                * `OFFLINE_EVENT` - Bet is submitted on an event that is offline or with incorrect lineId
+                * `PAST_CUTOFFTIME` - Bet is submitted on a game after the betting cutoff time
+                * `SYSTEM_ERROR_1` - Unexpected error or System error
+                * `SYSTEM_ERROR_2` - Unexpected error or System error
+                * `SYSTEM_ERROR_3` - Unexpected error or System error
+              enum:
+                - CANNOT_PARLAY_LIVE_GAME
+                - CORRELATED
+                - EVENT_NO_LONGER_AVAILABLE_FOR_BETTING
+                - EVENT_NOT_OFFERED_FOR_PARLAY
+                - INVALID_EVENT
+                - INVALID_LEG_BET_TYPE
+                - INVALID_PARLAY_BET
+                - LINE_CHANGED
+                - LINE_DOES_NOT_BELONG_TO_EVENT
+                - LISTED_PITCHERS_SELECTION_ERROR
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_1
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_2
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_3
+                - OFFLINE_EVENT
+                - PAST_CUTOFFTIME
+                - SYSTEM_ERROR_1
+                - SYSTEM_ERROR_2
+                - SYSTEM_ERROR_3
+            legId:
+              type: string
+              description: Echo of the legId from the request
+            correlatedLegs:
+              type: array
+              description: If errorCode is CORRELATED will contain legIds of all correlated legs
+              items:
+                type: string
+            lineId:
+              type: integer
+              format: int64
+              description: Line identification that bet will be placed on
+            altLineId:
+              type: integer
+              format: int64
+              description: If Leg will be placed on Alternate Line the Id of that line will be returned
+            price:
+              type: number
+              format: float
+              description: Current price of the line
   GetTeaserLinesResponse:
     type: object
     properties:
