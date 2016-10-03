@@ -351,6 +351,16 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetSpecialOddsResponse'
+  /client/balance:
+    get:
+      summary: Returns current client balance.
+      tags:
+        - Client
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetClientBalanceResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -1048,3 +1058,22 @@ definitions:
                           type: number
                           format: float
                           description: Handicap value for the given contestant
+  GetClientBalanceResponse:
+    type: object
+    properties:
+      availableBalance:
+        type: number
+        format: float
+        description: Amount available for betting
+      outstandingTransactions:
+        type: number
+        format: float
+        description: Sum of not yet settled bet amounts
+      givenCredit:
+        type: number
+        format: float
+        description: Client’s credit
+      currency:
+        type: number
+        format: float
+        description: Client’s currency code
