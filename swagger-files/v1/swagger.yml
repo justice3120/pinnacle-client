@@ -6,6 +6,8 @@ host: api.pinnacle.com
 schemes:
   - https
 basePath: /v1
+consumes:
+  - application/json
 produces:
   - application/json
 securityDefinitions:
@@ -361,6 +363,314 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetClientBalanceResponse'
+  /line:
+    get:
+      summary: Returns latest line.
+      tags:
+        - Line
+      parameters:
+        - name: sportId
+          in: query
+          description: ""
+          required: true
+          type: integer
+          format: int32
+        - name: leagueId
+          in: query
+          description: ""
+          required: true
+          type: integer
+          format: int64
+        - name: eventId
+          in: query
+          description: ""
+          required: true
+          type: integer
+          format: int64
+        - name: periodNumber
+          in: query
+          description: |
+            This represents the period of the match. For example, for soccer we have:
+
+            * `0` - Game
+            * `1` - 1st Half
+            * `2` - 2nd Half
+          required: true
+          type: integer
+          format: int32
+        - name: betType
+          in: query
+          description: ""
+          required: true
+          type: string
+          enum:
+            - MONEYLINE
+            - TEAM_TOTAL_POINTS
+            - SPREAD
+            - TOTAL_POINTS
+            - SPECIAL
+        - name: team
+          in: query
+          description: |
+            Chosen team type.
+            This is needed only for SPREAD, MONEYLINE and TEAM_TOTAL_POINTS bet types
+
+            * `Draw` - Draw. This is used for MONEYLINE bet type only.
+            * `Team1` - Team 1
+            * `Team2` - Team 2
+          required: false
+          type: string
+          enum:
+            - Draw
+            - Team1
+            - Team2
+        - name: side
+          in: query
+          description: |
+            Chosen side.
+            This is needed only for TOTAL_POINTS and TEAM_TOTAL_POINTS bet type
+          required: false
+          type: string
+          enum:
+            - OVER
+            - UNDER
+        - name: handicap
+          in: query
+          description: |
+            This is needed for SPREAD, TOTAL_POINTS and TEAM_TOTAL_POINTS bet type
+          required: false
+          type: number
+          format: float
+        - name: oddsFormat
+          in: query
+          description: Format the odds are returned in.
+          required: true
+          type: string
+          enum:
+            - AMERICAN
+            - DECIMAL
+            - HONGKONG
+            - INDONESIAN
+            - MALAY
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetLineResponse'
+  /line/parlay:
+    post:
+      summary: Returns parlay lines and calculate odds. Supports JSON format only.
+      tags:
+        - Line
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - oddsFormat
+              - legs
+            properties:
+              oddsFormat:
+                type: string
+                description: Format the odds are returned in.
+                enum:
+                  - AMERICAN
+                  - DECIMAL
+                  - HONGKONG
+                  - INDONESIAN
+                  - MALAY
+              legs:
+                type: array
+                description: This is a collection of legs (the format of the object is described below)
+                items:
+                  type: object
+                  required:
+                    - uniqueLegId
+                    - eventId
+                    - legBetType
+                    - periodNumber
+                  properties:
+                    uniqueLegId:
+                      type: string
+                      description: |
+                        This unique id of the leg.
+                        It used to identify and match leg in the response
+                    eventId:
+                      type: integer
+                      format: int64
+                      description: id of the event
+                    legBetType:
+                      type: string
+                      description: Only SPREAD, MONEYLINE and TOTAL_POINTS are supported
+                      enum:
+                        - MONEYLINE
+                        - SPREAD
+                        - TOTAL_POINTS
+                    team:
+                      type: string
+                      description: |
+                        Chosen team type.
+                        This is needed only for SPREAD and MONEYLINE bet types
+
+                        * `Draw` - Draw. This is used for MONEYLINE bet type only.
+                        * `Team1` - Team 1
+                        * `Team2` - Team 2
+                      enum:
+                        - Draw
+                        - Team1
+                        - Team2
+                    side:
+                      type: string
+                      description: Chosen side. This is needed only for TOTAL_POINTS bet type
+                      enum:
+                        - OVER
+                        - UNDER
+                    periodNumber:
+                      type: integer
+                      format: int32
+                      description: |
+                        This represents the period of the match. For example, for soccer we have:
+
+                        * `0` -  Game
+                        * `1` - 1st Half
+                        * `2` - 2nd Half
+                    handicap:
+                      type: number
+                      format: float
+                      description: This is needed for SPREAD and TOTAL_POINTS bet type
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetParlayLinesResponse'
+  /line/teaser:
+    get:
+      summary: Validates a teaser bet prior to submission. Returns bet limit and price on success.
+      tags:
+        - Line
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - teaserId
+              - oddsFormat
+              - legs
+            properties:
+              teaserId:
+                type: integer
+                format: int64
+                description: |
+                  Unique identifier.
+                  Teaser details can be retrieved from a call to Get Teaser Groups endpoint.
+              oddsFormat:
+                type: string
+                description: Format the odds are returned in.
+                enum:
+                  - AMERICAN
+                  - DECIMAL
+                  - HONGKONG
+                  - INDONESIAN
+                  - MALAY
+              legs:
+                type: array
+                description: This is a collection of legs (the format of the object is described below)
+                items:
+                  type: object
+                  required:
+                    - legId
+                    - eventId
+                    - betType
+                    - periodNumber
+                    - handicap
+                  properties:
+                    legId:
+                      type: string
+                      description: Client genereated GUID for uniquely identifying the leg.
+                    eventId:
+                      type: integer
+                      format: int64
+                      description: Unique identifier.
+                    betType:
+                      type: string
+                      description: |
+                        Type of bet.
+                        Currently, only BET_TYPE.SPREAD and BET_TYPE.TOTAL_POINTS are supported.
+                      enum:
+                        - MONEYLINE
+                        - TOTAL_POINTS
+                    team:
+                      type: string
+                      description: |
+                        Team being bet on for a spread line.
+                        Currenlty, only TEAM_TYPE.Team1 and TEAM_TYPE.Team2 are supported.
+
+                        * `Team1` - Team 1
+                        * `Team2` - Team 2
+                      enum:
+                        - Team1
+                        - Team2
+                    side:
+                      type: string
+                      description: Side of a total line being bet on.
+                      enum:
+                        - OVER
+                        - UNDER
+                    periodNumber:
+                      type: integer
+                      format: int32
+                      description: |
+                        Period of the match that is being bet on.
+                        Refer to Period Number lookup table.
+                    handicap:
+                      type: number
+                      format: float
+                      description: Number of points.
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetTeaserLinesResponse'
+  /line/special:
+    get:
+      summary: Returns latest special line.
+      tags:
+        - Line
+      parameters:
+        - name: specialId
+          in: query
+          description: Id of the special
+          required: true
+          type: integer
+          format: int64
+        - name: contestantId
+          in: query
+          description: Id of the contestant
+          required: true
+          type: integer
+          format: int64
+        - name: oddsFormat
+          in: query
+          description: Default is American
+          required: false
+          type: string
+          enum:
+            - AMERICAN
+            - DECIMAL
+            - HONGKONG
+            - INDONESIAN
+            - MALAY
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetSpecialLineResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -1074,6 +1384,220 @@ definitions:
         format: float
         description: Client’s credit
       currency:
+        type: string
+        description: Client’s currency code
+  GetLineResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: |
+          If the value is NOT_EXISTS, than this will be the only parameter in the response.
+          All other params would be empty.
+
+          * `NOT_EXISTS` - Line not offered anymore
+          * `SUCCESS` - OK
+        enum:
+          - NOT_EXISTS
+          - SUCCESS
+      price:
         type: number
         format: float
-        description: Client’s currency code
+        description: Latest price
+      lineId:
+        type: integer
+        format: int64
+        description: Line identification needed to place a bet
+      altLineId:
+        type: integer
+        format: int64
+        description: |
+          This would be needed to place the bet if the handicap is on alternate line,
+          otherwise it will not be in the response.
+      team1Score:
+        type: integer
+        format: int32
+        description: Team 1 score. Applicable to soccer only
+      team2Score:
+        type: integer
+        format: int32
+        description: Team 2 score. Applicable to soccer only
+      team1RedCards:
+        type: integer
+        format: int32
+        description: Team 1 red cards. Applicable to soccer only.
+      team2RedCards:
+        type: integer
+        format: int32
+        description: Team 2 red cards. Applicable to soccer only.
+      maxRiskStake:
+        type: number
+        format: float
+        description: Maximum bettable risk amount
+      minRiskStake:
+        type: number
+        format: float
+        description: Minimum bettable risk amount
+      maxWinStake:
+        type: number
+        format: float
+        description: Maximum bettable win amount
+      minWinStake:
+        type: number
+        format: float
+        description: Minimum bettable win amount
+      effectiveAsOf:
+        type: string
+        format: date-time
+        description: Line is effective as of this date and time
+  GetTeaserLinesResponse:
+    type: object
+    properties:
+      code:
+        type: string
+        description: |
+          Code identifying an error that occurred.
+
+          * `INVALID_REQUEST_DATA` - Generic error code indicating that there is something wrong in the request. Refer to associated message containing further details.
+        enum:
+          - INVALID_REQUEST_DATA
+      message:
+        type: string
+        description: Human friendly error message.
+      status:
+        type: string
+        description: |
+          Indicates whether the teaser is valid or not.
+
+          * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+          * `VALID` - Teaser is valid.
+        enum:
+          - PROCESSED_WITH_ERROR
+          - VALID
+      errorCode:
+        type: string
+        description: |
+          Not present if status != TEASER_LINES_STATUS.PROCESSED_WITH_ERROR.
+
+          * `INVALID_LEGS` - One or more of the legs is invalid.
+          * `SAME_EVENT_ONLY_REQUIRED` - Teaser specified requires that all legs are from the same event.
+          * `TEASER_DISABLED` - Teaser has been disabled and cannot be bet on.
+          * `TEASER_DOES_NOT_EXIST` - The teaser identifier could requeted could not be found.
+          * `TOO_FEW_LEGS` - You do not meet the minimum number of legs requirement for the teaser specified.
+          * `TOO_MANY_LEGS` - You are above the maximum number of legs for the teaser specified.
+          * `UNKNOWN` - An unknown error has occured.
+        enum:
+          - INVALID_LEGS
+          - SAME_EVENT_ONLY_REQUIRED
+          - TEASER_DISABLED
+          - TEASER_DOES_NOT_EXIST
+          - TOO_FEW_LEGS
+          - TOO_MANY_LEGS
+          - UNKNOWN
+      price:
+        type: number
+        format: float
+        description: Price for the bet.
+      maxRiskStake:
+        type: number
+        format: float
+        description: Minimum bet amount for WIN_RISK_TYPE.RISK.
+      minRiskStake:
+        type: number
+        format: float
+        description: Maximum bet amount for WIN_RISK_TYPE.RISK.
+      maxWinStake:
+        type: number
+        format: float
+        description: Minimum bet amount for WIN_RISK_TYPE.WIN.
+      minWinStake:
+        type: number
+        format: float
+        description: Maximum bet amount for WIN_RISK_TYPE.WIN.
+      legs:
+        type: array
+        description: Collection of Leg.
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Indicates whether the teaser is valid or not.
+
+                * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+                * `VALID` - Teaser is valid.
+              enum:
+                - PROCESSED_WITH_ERROR
+                - VALID
+            errorCode:
+              type: string
+              description: |
+                Not present if status != TEASER_LINES_STATUS. PROCESSED_WITH_ERROR.
+
+                * `EVENT_NOT_FOUND` - The event specified could not be found.
+                * `POINTS_NO_LONGER_AVAILABLE` - The points requested are no longer available. This means that the lines a moved.
+                * `UNKNOWN` - An unknown error has occured.
+                * `WAGER_TYPE_NOT_VALID_FOR_TEASER` - The specified wager type is not valid for teasers.
+              enum:
+                - EVENT_NOT_FOUND
+                - POINTS_NO_LONGER_AVAILABLE
+                - UNKNOWN
+                - WAGER_TYPE_NOT_VALID_FOR_TEASER
+            legId:
+              type: string
+              description: Client genereated GUID that was provided in request.
+            lineId:
+              type: integer
+              format: int64
+              description: Unique identifier.
+  GetSpecialLineResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: |
+          If the value is NOT_EXISTS, than this will be the only parameter in the response.
+          All other params would be empty.
+
+          * `NOT_EXISTS` - Line not offered anymore
+          * `SUCCESS` - OK
+        enum:
+          - NOT_EXISTS
+          - SUCCESS
+      specialId:
+        type: integer
+        format: int64
+        description: Echo of the requested special id
+      contestantId:
+        type: integer
+        format: int64
+        description: Echo of the requested contestant id
+      price:
+        type: number
+        format: float
+        description: Latest price
+      lineId:
+        type: integer
+        format: int64
+        description: Line identification needed to place a bet
+      maxRiskStake:
+        type: number
+        format: float
+        description: Maximum bettable risk amount
+      minRiskStake:
+        type: number
+        format: float
+        description: Minimum bettable risk amount
+      maxWinStake:
+        type: number
+        format: float
+        description: Maximum bettable win amount
+      minWinStake:
+        type: number
+        format: float
+        description: Minimum bettable win amount
+      handicap:
+        type: number
+        format: float
+        description: Handicap, if present
