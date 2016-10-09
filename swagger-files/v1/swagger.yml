@@ -678,6 +678,550 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetSpecialLineResponse'
+  /bets/place:
+    post:
+      summary: Place bet in the system.
+      tags:
+        - Bet
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - uniqueRequestId
+              - acceptBetterLine
+              - oddsFormat
+              - stake
+              - winRiskStake
+              - sportId
+              - eventId
+              - periodNumber
+              - betType
+              - lineId
+            properties:
+              uniqueRequestId:
+                type: string
+                description: |
+                  This unique id of the place bet requests.
+                  This is to support idempotent requests
+              acceptBetterLine:
+                type: string
+                description: Whether or not to accept a bet when there is a line change in favor of the client
+                enum:
+                  - FALSE
+                  - TRUE
+              customerReference:
+                type: string
+                description: Reference to a customer in third party system.
+              oddsFormat:
+                type: string
+                description: Bet is processed with this odds format.
+                enum:
+                  - AMERICAN
+                  - DECIMAL
+                  - HONGKONG
+                  - INDONESIAN
+                  - MALAY
+              stake:
+                type: number
+                format: float
+                description: Wagered amount in Client’s currency
+              winRiskStake:
+                type: string
+                description: |
+                  Whether the stake amount is risk or win amount
+
+                  * `RISK` - Stake is risk amount
+                  * `WIN` - Stake is win amount
+                enum:
+                  - RISK
+                  - WIN
+              sportId:
+                type: integer
+                format: int64
+                description: ""
+              eventId:
+                type: integer
+                format: int64
+                description: ""
+              periodNumber:
+                type: integer
+                format: int32
+                description: |
+                  This represents the period of the match. For example, for soccer we have:
+
+                  * `0` - Game
+                  * `1` - 1st Half
+                  * `2` - 2nd Half
+              betType:
+                type: string
+                description: ""
+                enum:
+                  - MONEYLINE
+                  - TEAM_TOTAL_POINTS
+                  - SPREAD
+                  - TOTAL_POINTS
+                  - SPECIAL
+              team:
+                type: string
+                description: |
+                  Chosen team type.
+                  This is needed only for SPREAD, MONEYLINE and TEAM_TOTAL_POINTS bet types
+
+                  * `Draw` - Draw. This is used for MONEYLINE bet type only.
+                  * `Team1` - Team 1
+                  * `Team2` - Team 2
+                enum:
+                  - Draw
+                  - Team1
+                  - Team2
+              side:
+                type: string
+                description: |
+                  Chosen side.
+                  This is needed only for TOTAL_POINTS and TEAM_TOTAL_POINTS bet type
+                enum:
+                  - OVER
+                  - UNDER
+              lineId:
+                type: integer
+                format: int64
+                description: Line identification
+              altLineId:
+                type: integer
+                format: int64
+                description: Alternate line identification
+              pitcher1MustStart:
+                type: string
+                description: |
+                  Baseball only. Refers to the pitcher for TEAM_TYPE.Team1.
+                  This applicable only for MONEYLINE bet type, for all other bet types this has to be TRUE
+                enum:
+                  - FALSE
+                  - TRUE
+              pitcher2MustStart:
+                type: string
+                description: |
+                  Baseball only. Refers to the pitcher for TEAM_TYPE. Team2.
+                  This applicable only for MONEYLINE bet type, for all other bet types this has to be TRUE
+                enum:
+                  - FALSE
+                  - TRUE
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/PlaceBetResponse'
+  /bets/parlay:
+    post:
+      summary: Place parlay bet in the system. Supports JSON format only.
+      tags:
+        - Bet
+        - Parlay
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - uniqueRequestId
+              - acceptBetterLine
+              - oddsFormat
+              - riskAmount
+              - roundRobinOptions
+              - legs
+            properties:
+              uniqueRequestId:
+                type: string
+                description: |
+                  This unique id of the place bet requests.
+                  This is to support idempotent requests
+              acceptBetterLine:
+                type: string
+                description: Whether or not to accept a bet when there is a line change in favor of the client
+                enum:
+                  - FALSE
+                  - TRUE
+              oddsFormat:
+                type: string
+                description: Bet is processed with this odds format
+                enum:
+                  - AMERICAN
+                  - DECIMAL
+                  - HONGKONG
+                  - INDONESIAN
+                  - MALAY
+              riskAmount:
+                type: number
+                format: float
+                description: |
+                  Wagered amount in Client’s currency. It is always risk amount when placing Parlay bets
+                  NOTE: If round robin options is used this amount will apply for all parlays so actual amount wagered will be riskAmount X number of Parlays
+              roundRobinOptions:
+                type: array
+                description: ""
+                items:
+                  type: string
+                  description: |
+                    Round Robin option
+
+                    * `Parlay` - Single parlay that include all wagers (No Round Robin)
+                    * `TwoLegRoundRobin` - Multiple parlays having 2 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                    * `ThreeLegRoundRobin` - Multiple parlays having 3 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                    * `FourLegRoundRobin` - Multiple parlays having 4 wagers each (round robin style). Can be used if number of legs is greater or equal to 4
+                    * `FiveLegRoundRobin` - Multiple parlays having 5 wagers each (round robin style). Can be used if number of legs is greater or equal to 5
+                    * `SixLegRoundRobin` - Multiple parlays having 6 wagers each (round robin style). Can be used if number of legs is greater or equal to 6
+                    * `SevenLegRoundRobin` - Multiple parlays having 7 wagers each (round robin style). Can be used if number of legs is greater or equal to 7
+                    * `EightLegRoundRobin` - Multiple parlays having 8 wagers each (round robin style). Can be used if number of legs is  equal to 8
+                  enum:
+                    - Parlay
+                    - TwoLegRoundRobin
+                    - ThreeLegRoundRobin
+                    - FourLegRoundRobin
+                    - FiveLegRoundRobin
+                    - SixLegRoundRobin
+                    - SevenLegRoundRobin
+                    - EightLegRoundRobin
+              legs:
+                type: array
+                description: Collection of parlay legs
+                items:
+                  type: object
+                  required:
+                    - uniqueLegId
+                    - legBetType
+                    - lineId
+                    - eventId
+                    - sportId
+                    - periodNumber
+                  properties:
+                    uniqueLegId:
+                      type: string
+                      description: |
+                        This unique id of the leg.
+                        It used to identify and match leg in the response
+                    legBetType:
+                      type: string
+                      description: Only SPREAD, MONEYLINE and TOTAL_POINTS are supported
+                      enum:
+                        - MONEYLINE
+                        - SPREAD
+                        - TOTAL_POINTS
+                    lineId:
+                      type: integer
+                      format: int64
+                      description: Line identification
+                    altLineId:
+                      type: integer
+                      format: int64
+                      description: Alternate line identification
+                    eventId:
+                      type: integer
+                      format: int64
+                      description: Event ID for the given leg
+                    sportId:
+                      type: integer
+                      format: int32
+                      description: Sport ID for the given leg
+                    team:
+                      type: string
+                      description: |
+                        Chosen team type.
+                        This is needed only for SPREAD and MONEYLINE bet types
+
+                        * `Draw` - Draw. This is used for MONEYLINE bet type only.
+                        * `Team1` - Team 1
+                        * `Team2` - Team 2
+                      enum:
+                        - Draw
+                        - Team1
+                        - Team2
+                    side:
+                      type: string
+                      description: Chosen side. This is needed only for TOTAL_POINTS bet type
+                      enum:
+                        - OVER
+                        - UNDER
+                    periodNumber:
+                      type: integer
+                      format: int32
+                      description: |
+                        This represents the period of the match. For example, for soccer we have:
+
+                        * `0` -  Game
+                        * `1` - 1st Half
+                        * `2` - 2nd Half
+                    pitcher1MustStart:
+                      type: string
+                      description: |
+                        Baseball only. Refers to the pitcher for TEAM_TYPE.Team1.
+                        This applicable only for MONEYLINE bet type, for all other bet types this has to be TRUE
+                      enum:
+                        - FALSE
+                        - TRUE
+                    pitcher2MustStart:
+                      type: string
+                      description: |
+                        Baseball only. Refers to the pitcher for TEAM_TYPE. Team2.
+                        This applicable only for MONEYLINE bet type, for all other bet types this has to be TRUE
+                      enum:
+                        - FALSE
+                        - TRUE
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/PlaceParlayBetResponse'
+  /bets/teaser:
+    post:
+      summary: Place bet in the system.
+      tags:
+        - Bet
+        - Teaser
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - uniqueRequestId
+              - teaserId
+              - oddsFormat
+              - winRiskStake
+              - stake
+              - legs
+            properties:
+              uniqueRequestId:
+                type: string
+                description: Client genereated GUID for uniquely identifying the bet.
+              teaserId:
+                type: integer
+                format: int64
+                description: |
+                  Unique identifier.
+                  Teaser details can be retrieved from a call to Get Teaser Groups endpoint.
+              oddsFormat:
+                type: string
+                description: Format the odds are returned in.
+                enum:
+                  - AMERICAN
+                  - DECIMAL
+                  - HONGKONG
+                  - INDONESIAN
+                  - MALAY
+              winRiskStake:
+                type: string
+                description: |
+                  Whether the stake amount is risk or win amount
+
+                  * `RISK` - Stake is risk amount
+                  * `WIN` - Stake is win amount
+              stake:
+                type: number
+                format: float
+                description: Wagered amount in Client’s currency
+              legs:
+                type: array
+                description: Collection of Leg.
+                items:
+                  type: object
+                  required:
+                    - legId
+                    - betType
+                    - lineId
+                    - eventId
+                    - handicap
+                  properties:
+                    legId:
+                      type: string
+                      description: Client genereated GUID for uniquely identifying the leg.
+                    betType:
+                      type: string
+                      description: |
+                        Type of bet.
+                        Currently, only BET_TYPE.SPREAD and BET_TYPE.TOTAL_POINTS are supported.
+                      enum:
+                        - MONEYLINE
+                        - TOTAL_POINTS
+                    lineId:
+                      type: integer
+                      format: int64
+                      description: Unique identifier.
+                    eventId:
+                      type: integer
+                      format: int64
+                      description: Unique identifier.
+                    handicap:
+                      type: number
+                      format: float
+                      description: Number of points.
+                    side:
+                      type: string
+                      description: Side of a total line being bet on.
+                      enum:
+                        - OVER
+                        - UNDER
+                    team:
+                      type: string
+                      description: |
+                        Team being bet on for a spread line.
+                        Currenlty, only TEAM_TYPE.Team1 and TEAM_TYPE.Team2 are supported.
+
+                        * `Team1` - Team 1
+                        * `Team2` - Team 2
+                      enum:
+                        - Team1
+                        - Team2
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/PlaceTeaserBetResponse'
+  /bets/special:
+    post:
+      summary: Place special bet in the system.
+      tags:
+        - Bet
+        - Special
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            required:
+              - bets
+            properties:
+              bets:
+                type: array
+                description: A list of special bets
+                items:
+                  type: object
+                  required:
+                    - uniqueRequestId
+                    - acceptBetterLine
+                    - oddsFormat
+                    - stake
+                    - winRiskStake
+                    - lineId
+                    - specialId
+                    - contestantId
+                  properties:
+                    uniqueRequestId:
+                      type: string
+                      description: |
+                        This unique id of the place bet requests.
+                        This is to support idempotent requests
+                    acceptBetterLine:
+                      type: string
+                      description: Whether or not to accept a bet when there is a line change in favor of the client
+                      enum:
+                        - FALSE
+                        - TRUE
+                    oddsFormat:
+                      type: string
+                      description: Bet is processed with this odds format.
+                      enum:
+                        - AMERICAN
+                        - DECIMAL
+                        - HONGKONG
+                        - INDONESIAN
+                        - MALAY
+                    stake:
+                      type: number
+                      format: float
+                      description: Wagered amount in Client’s currency
+                    winRiskStake:
+                      type: string
+                      description: |
+                        Whether the stake amount is risk or win amount
+
+                        * `RISK` - Stake is risk amount
+                        * `WIN` - Stake is win amount
+                      enum:
+                        - RISK
+                        - WIN
+                    lineId:
+                      type: integer
+                      format: int64
+                      description: Line id from /line/special response
+                    specialId:
+                      type: integer
+                      format: int64
+                      description: Special id
+                    contestantId:
+                      type: integer
+                      format: int64
+                      description: Contestant id
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/PlaceSpecialBetResponse'
+  /bets:
+    get:
+      summary: Returns running and settled bets in the last 30 days.
+      tags:
+        - Bet
+      parameters:
+        - name: betlist
+          in: query
+          description: |
+            Not needed when betids is submitted
+
+            * `SETTLED` - Settled bets
+            * `RUNNING` - Running bets
+            * `CANCELLED` - Cancelled bets
+          required: false
+          type: string
+          enum:
+            - SETTLED
+            - RUNNING
+            - CANCELLED
+        - name: betids
+          in: query
+          description: |
+            Array of bet ids. When betids is submitted,
+            no other parameter is necessary Maximum is 100 ids
+            Works for all non settled bets and all bets settled in the last 30 days
+          required: false
+          type: array
+          collectionFormat: csv
+          maxItems: 100
+          items:
+            type: integer
+            format: int64
+        - name: fromDate
+          in: query
+          description: |
+            Start date of the requested period. Required when betlist parameter is submitted
+            Difference between fromDate and toDdate can’t be more than 30 days
+            Expected format is ISO8601 - can be set to just date or date and time
+          required: false
+          type: string
+          format: date-time
+        - name: toDate
+          in: query
+          description: |
+            End date of the requested period Required when betlist parameter is submitted
+            Expected format is ISO8601 - can be set to just date or date and time
+            toDate value is exclusive, meaning it cannot be equal to fromDate
+          required: false
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetBetsResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -1772,3 +2316,874 @@ definitions:
         type: number
         format: float
         description: Handicap, if present
+  PlaceBetResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: |
+          * `ACCEPTED` - Accepted
+          * `PENDING_ACCEPTANCE` - Pending Acceptance. This is for bets with the live delay or in danger zone
+          * `PROCESSED_WITH_ERROR` - Processed with error
+        enum:
+          - ACCEPTED
+          - PENDING_ACCEPTANCE
+          - PROCESSED_WITH_ERROR
+      errorCode:
+        type: string
+        description: |
+          If Status is PROCESSED_WITH_ERROR, errorCode will be in the response.
+
+          * `ALL_BETTING_CLOSED` - Betting is not allowed at this moment. This may happen during system maintenance
+          * `ALL_LIVE_BETTING_CLOSED	` - Live betting is not allowed at this moment. This may happen during system maintenance
+          * `ABOVE_EVENT_MAX` - Bet cannot be placed because client exceeded allowed maximum of risk on a line
+          * `ABOVE_MAX_BET_AMOUNT` - Stake is above allowed maximum amount
+          * `BELOW_MIN_BET_AMOUNT` - Stake is below allowed minimum amount
+          * `BLOCKED_BETTING` - Customer is an agent
+          * `BLOCKED_CLIENT` - Client is no longer active
+          * `INSUFFICIENT_FUNDS ` - Bet is submitted by a client with insufficient funds
+          * `INVALID_COUNTRY` - Client country is not allowed for betting
+          * `INVALID_EVENT` - Invalid eventid
+          * `INVALID_ODDS_FORMAT` - If a bet was submitted with the odds format that is not allowed for the client
+          * `LINE_CHANGED` - Bet is submitted on a line that has changed
+          * `LISTED_PITCHERS_SELECTION_ERROR` - If bet was submitted with pitcher1MustStart and/or pitcher2MustStart parameters in Place Bet request with values that are not allowed.
+          * `OFFLINE_EVENT` - Bet is submitted on a event that is offline (event status is H) or the submitted line is not offered at the moment due to points/handicap change or the submitted bet type is just not offered at the moment.
+          * `PAST_CUTOFFTIME` - Bet is submitted on a game after the betting cutoff time
+          * `RED_CARDS_CHANGED` - Bet is submitted on a live soccer event with changed red card count
+          * `SCORE_CHANGED` - Bet is submitted on a live soccer event with changed score
+          * `TIME_RESTRICTION` - Bet is submitted within too short of a period from the same bet previously placed by a client
+        enum:
+          - ALL_BETTING_CLOSED
+          - ALL_LIVE_BETTING_CLOSED
+          - ABOVE_EVENT_MAX
+          - ABOVE_MAX_BET_AMOUNT
+          - BELOW_MIN_BET_AMOUNT
+          - BLOCKED_BETTING
+          - BLOCKED_CLIENT
+          - INSUFFICIENT_FUNDS
+          - INVALID_COUNTRY
+          - INVALID_EVENT
+          - INVALID_ODDS_FORMAT
+          - LINE_CHANGED
+          - LISTED_PITCHERS_SELECTION_ERROR
+          - OFFLINE_EVENT
+          - PAST_CUTOFFTIME
+          - RED_CARDS_CHANGED
+          - SCORE_CHANGED
+          - TIME_RESTRICTION
+      betId:
+        type: integer
+        format: int64
+        description: The bet ID of the new bet. May be empty on failure.
+      uniqueRequestId:
+        type: string
+        description: Echo of the uniqueRequestId from the request.
+      betterLineWasAccepted:
+        type: boolean
+        description: |
+          Whether or not the bet was accepted on the line that changed in favour of client.
+          This can be true only if acceptBetterLine in the Place Bet request is set to TRUE.
+      price:
+        type: number
+        format: float
+        description: For accepted bets, this will have the price at which the wager is accepted
+  PlaceParlayBetResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: |
+          * `ACCEPTED` - Accepted
+          * `PENDING_ACCEPTANCE` - Pending Acceptance. This is for bets with the live delay or in danger zone
+          * `PROCESSED_WITH_ERROR` - Processed with error
+        enum:
+          - ACCEPTED
+          - PENDING_ACCEPTANCE
+          - PROCESSED_WITH_ERROR
+      errorCode:
+        type: string
+        description: |
+          If Status is PROCESSED_WITH_ERROR , error will be in the response
+
+          * `ABOVE_MAX_BET_AMOUNT` - Stake is above allowed maximum amount
+          * `ALL_BETTING_CLOSED` - Betting is not allowed at this moment
+          * `BELOW_MIN_BET_AMOUNT` - Stake is below allowed minimum amount
+          * `BLOCKED_BETTING` - Customer is an agent
+          * `BLOCKED_CLIENT` - Client is no longer active
+          * `INSUFFICIENT_FUNDS` - Bet is submitted by a client with insufficient funds
+          * `INVALID_COUNTRY` - Client country is not allowed for betting
+          * `INVALID_LEGS` - One or more legs are invalid
+          * `INVALID_ODDS_FORMAT` - If a bet was submitted with the odds format that is not allowed for the client
+          * `INVALID_ROUND_ROBIN_OPTIONS` - Round robin options are invalid (i.e. does not match with number of legs)
+          * `ROUND_ROBIN_DISALLOWED` - Round robin is disallowed for one of the leagues
+          * `TOO_MANY_LEGS` - Maximum of 10 legs can be specified
+          * `TOO_FEW_LEGS` - At least 2 legs are required for Parlay
+        enum:
+          - ABOVE_MAX_BET_AMOUNT
+          - ALL_BETTING_CLOSED
+          - BELOW_MIN_BET_AMOUNT
+          - BLOCKED_BETTING
+          - BLOCKED_CLIENT
+          - INSUFFICIENT_FUNDS
+          - INVALID_COUNTRY
+          - INVALID_LEGS
+          - INVALID_ODDS_FORMAT
+          - INVALID_ROUND_ROBIN_OPTIONS
+          - ROUND_ROBIN_DISALLOWED
+          - TOO_MANY_LEGS
+          - TOO_FEW_LEGS
+      betId:
+        type: integer
+        format: int64
+        description: The bet ID of the new bet. May be empty on failure.
+      uniqueRequestId:
+        type: string
+        description: Echo of the uniqueRequestId from the request.
+      roundRobinOptionWithOdds:
+        type: array
+        description: |
+          Provides array with all acceptable Round Robin options with parlay odds for that option
+        items:
+          type: object
+          properties:
+            RoundRobinOption:
+              type: string
+              description: |
+                Round Robin option
+
+                * `Parlay` - Single parlay that include all wagers (No Round Robin)
+                * `TwoLegRoundRobin` - Multiple parlays having 2 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                * `ThreeLegRoundRobin` - Multiple parlays having 3 wagers each (round robin style). Can be used if number of legs is greater or equal to 3
+                * `FourLegRoundRobin` - Multiple parlays having 4 wagers each (round robin style). Can be used if number of legs is greater or equal to 4
+                * `FiveLegRoundRobin` - Multiple parlays having 5 wagers each (round robin style). Can be used if number of legs is greater or equal to 5
+                * `SixLegRoundRobin` - Multiple parlays having 6 wagers each (round robin style). Can be used if number of legs is greater or equal to 6
+                * `SevenLegRoundRobin` - Multiple parlays having 7 wagers each (round robin style). Can be used if number of legs is greater or equal to 7
+                * `EightLegRoundRobin` - Multiple parlays having 8 wagers each (round robin style). Can be used if number of legs is  equal to 8
+              enum:
+                - Parlay
+                - TwoLegRoundRobin
+                - ThreeLegRoundRobin
+                - FourLegRoundRobin
+                - FiveLegRoundRobin
+                - SixLegRoundRobin
+                - SevenLegRoundRobin
+                - EightLegRoundRobin
+            Odds:
+              type: number
+              format: float
+              description: Odds for Round Robin option in requested Odds forma
+      validLegs:
+        type: array
+        description: Collection of valid legs. Can be empty if no valid legs found
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Indicates whether the teaser is valid or not.
+
+                * `VALID` - Teaser is valid.
+              enum:
+                - VALID
+            legId:
+              type: string
+              description: Echo of the legId from the request
+            lineId:
+              type: integer
+              format: int64
+              description: Line identification that bet will be placed on
+            altLineId:
+              type: integer
+              format: int64
+              description: If Leg will be placed on Alternate Line the Id of that line will be returned
+            price:
+              type: number
+              format: float
+              description: Current price of the line
+      invalidLegs:
+        type: array
+        description: The collection of legs that resulted in error. Can be empty if no invalid legs found
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Indicates whether the teaser is valid or not.
+
+                * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+              enum:
+                - PROCESSED_WITH_ERROR
+            errorCode:
+              type: string
+              description: |
+                If Status is PROCESSED_WITH_ERROR, errorCode will be in the response
+
+                * `CANNOT_PARLAY_LIVE_GAME` - The wager is placed on Live game
+                * `CORRELATED` - The leg is correlated with another one
+                * `EVENT_NO_LONGER_AVAILABLE_FOR_BETTING` - The event is no longer offered for Parlays
+                * `EVENT_NOT_OFFERED_FOR_PARLAY` - The event is not offered for Parlays
+                * `INVALID_EVENT` - Live betting is not allowed at this moment
+                * `INVALID_LEG_BET_TYPE` - Leg bet type is not accepted for Parlays, Accepted values are: SPREAD, MONEYLINE, TOTAL_POINTS
+                * `INVALID_PARLAY_BET` - The leg did not validated due to error on Parlay Bet. Check the error PlaceParlayBet response for error details
+                * `LINE_CHANGED` - Bet is submitted on a line that has changed
+                * `LINE_DOES_NOT_BELONG_TO_EVENT` - LineId does not match the EventId specified in the request
+                * `LISTED_PITCHERS_SELECTION_ERROR` - If bet was submitted with pitcher1MustStart and/or pitcher2MustStart parameters with values that are not allowed
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_1` - Due to line change odds are not offered for Parlay anymore
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_2` - Due to line change odds are not offered for Parlay anymore
+                * `ODDS_NO_LONGER_OFFERED_FOR_PARLAY_3` - Due to line change odds are not offered for Parlay anymore
+                * `OFFLINE_EVENT` - Bet is submitted on an event that is offline or with incorrect lineId
+                * `PAST_CUTOFFTIME` - Bet is submitted on a game after the betting cutoff time
+                * `SYSTEM_ERROR_1` - Unexpected error or System error
+                * `SYSTEM_ERROR_2` - Unexpected error or System error
+                * `SYSTEM_ERROR_3` - Unexpected error or System error
+              enum:
+                - CANNOT_PARLAY_LIVE_GAME
+                - CORRELATED
+                - EVENT_NO_LONGER_AVAILABLE_FOR_BETTING
+                - EVENT_NOT_OFFERED_FOR_PARLAY
+                - INVALID_EVENT
+                - INVALID_LEG_BET_TYPE
+                - INVALID_PARLAY_BET
+                - LINE_CHANGED
+                - LINE_DOES_NOT_BELONG_TO_EVENT
+                - LISTED_PITCHERS_SELECTION_ERROR
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_1
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_2
+                - ODDS_NO_LONGER_OFFERED_FOR_PARLAY_3
+                - OFFLINE_EVENT
+                - PAST_CUTOFFTIME
+                - SYSTEM_ERROR_1
+                - SYSTEM_ERROR_2
+                - SYSTEM_ERROR_3
+            legId:
+              type: string
+              description: Echo of the legId from the request
+            correlatedLegs:
+              type: array
+              description: If errorCode is CORRELATED will contain legIds of all correlated legs
+              items:
+                type: string
+            lineId:
+              type: integer
+              format: int64
+              description: Line identification that bet will be placed on
+            altLineId:
+              type: integer
+              format: int64
+              description: If Leg will be placed on Alternate Line the Id of that line will be returned
+            price:
+              type: number
+              format: float
+              description: Current price of the line
+  PlaceTeaserBetResponse:
+    type: object
+    properties:
+      code:
+        type: string
+        description: |
+          Code identifying an error that occurred.
+
+          * `BLOCKED_BETTING` - Customer is an agent.
+          * `DUPLICATED_REQUEST` -
+          * `RESUBMIT_REQUEST` - The ticket hast to be resubmitted.
+          * `UNEXPECTED_ERROR` - Unexpected error.
+        enum:
+          - BLOCKED_BETTING
+          - DUPLICATED_REQUEST
+          - RESUBMIT_REQUEST
+          - UNEXPECTED_ERROR
+      message:
+        type: string
+        description: Human friendly error message.
+      status:
+        type: string
+        description: |
+          Indicates whether the bet is valid or not.
+
+          * `ACCEPTED` - Bet has been successfully placed
+          * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+          * `VALID` - Teaser is valid.
+        enum:
+          - ACCEPTED
+          - PROCESSED_WITH_ERROR
+          - VALID
+      errorCode:
+        type: string
+        description: |
+          Not present if status != PROCESSED_WITH_ERROR.
+
+          * `ABOVE_MAX_BET_AMOUNT` - Bet is above the maximum allowed
+          * `ALL_BETTING_CLOSED` - The wagering is disabled in the system (not related to a customer)
+          * `BELOW_MIN_BET_AMOUNT` - Bet is below the minimum allowed
+          * `DOUBLE_HIT` - Customer is an agent
+          * `BLOCKED_BETTING` - Customer is inactive in the system
+          * `BLOCKED_CLIENT` - The website submitted the same bet more than once
+          * `DUPLICATE_CLIENT_REFERENCE_ID` - The teaser unique id and/or one of the leg unique id are the same
+          * `INCOMPLETE_CUSTOMER_BETTING_PROFILE` - The customer does not exist
+          * `INSUFFICIENT_FUNDS` - The risk amount is above the customer’s available balance
+          * `INVALID_COUNTRY` - Current location is proscribed
+          * `INVALID_CUSTOMER_PROFILE` - EITHER the customer does not exist OR the customer business rules are not verified
+          * `INVALID_LEGS` - One or more legs are not verified
+          * `INVALID_REQUEST` - Teaser request is not valid
+          * `ODDS_FORMAT_MISMATCH` - Agent customer’s odds format differs from wager request odds format
+          * `RESUBMIT_REQUEST` - The ticket hast to be resubmitted
+          * `TEASER_DOES_NOT_EXIST` - Teaser does not exist in the system
+          * `SAME_EVENT_ONLY_REQUIRED` - Legs required to be for the same game only. Specified in the Teaser Specifications
+          * `SYSTEM_ERROR_1` - Teasers and TeaserLegs have only one generic SystemError (not 1, 2, 3) which can be anything from DB error to the error we could not map or Undefined
+          * `SYSTEM_ERROR_2` - Teasers and TeaserLegs have only one generic SystemError (not 1, 2, 3) which can be anything from DB error to the error we could not map or Undefined. In this case the betting api is mapped to Undefined
+          * `SYSTEM_ERROR_3` - Teasers and TeaserLegs have only one generic SystemError (not 1, 2, 3) which can be anything from DB error to the error we could not map or Undefined. In this case the betting api is mapped to Teaser Pay Card does not exist in the system
+          * `TOO_FEW_LEGS` - Legs count is below Min Picks specified in the Teaser Specifications
+          * `TOO_MANY_LEGS` - Legs count is above Max Picks specified in the Teaser Specifications
+          * `UNKNOWN` - An unknown error has occured
+          * `WAGERING_SUSPENDED` - The customer wagering is suspended
+        enum:
+          - ABOVE_MAX_BET_AMOUNT
+          - ALL_BETTING_CLOSED
+          - BELOW_MIN_BET_AMOUNT
+          - BLOCKED_BETTING
+          - BLOCKED_CLIENT
+          - DOUBLE_HIT
+          - DUPLICATE_CLIENT_REFERENCE_ID
+          - INCOMPLETE_CUSTOMER_BETTING_PROFILE
+          - INSUFFICIENT_FUNDS
+          - INVALID_COUNTRY
+          - INVALID_CUSTOMER_PROFILE
+          - INVALID_LEGS
+          - INVALID_REQUEST
+          - ODDS_FORMAT_MISMATCH
+          - RESUBMIT_REQUEST
+          - TEASER_DOES_NOT_EXIST
+          - SAME_EVENT_ONLY_REQUIRED
+          - SYSTEM_ERROR_1
+          - SYSTEM_ERROR_2
+          - SYSTEM_ERROR_3
+          - TOO_FEW_LEGS
+          - TOO_MANY_LEGS
+          - UNKNOWN
+          - WAGERING_SUSPENDED
+      uniqueRequestId:
+        type: string
+        description: Client genereated GUID that was provided in request
+      betId:
+        type: integer
+        format: int64
+        description: Unique identifier
+      price:
+        type: number
+        format: float
+        description: Price for the bet.
+      riskAmount:
+        type: number
+        format: float
+        description: Amount wagered
+      winAmount:
+        type: number
+        format: float
+        description: Potential winnings
+      invalidLegs:
+        type: array
+        description: Collection of InvalidLeg
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Status will always be PLACE_TEASER_BET_LEG_STATUS .PROCESSED_WITH_ERROR
+
+                * `PROCESSED_WITH_ERROR` - Teaser contains error(s).
+              enum:
+                - PROCESSED_WITH_ERROR
+            errorCode:
+              type: string
+              description: |
+                * `CANNOT_TEASER_LIVE_GAME` - Teaser is not allowed on a live game
+                * `CHECK_TEASER_ERROR` - The teaser is invalid, check the teaser error for more details
+                * `INVALID_EVENT` - The game is not found in the system
+                * `INVALID_LEG_BET` - The wager is not verified
+                * `INVALID_LEG_BET_TYPE` - Wager type is not “teasable”, can be either Spread or Total
+                * `LINE_CHANGED` - Wager is placed on a line that has changed
+                * `LINE_DOES_NOT_BELONG_TO_EVENT` - There was no game found for the wager
+                * `OFFLINE_EVENT` - EITHER the game is offline OR there was no game found for the wager
+                * `PAST_CUTOFFTIME` - Wager is placed on a game after the cutoff time
+                * `POINTS_ARE_NOT_ADJUSTED` - The teaser points were not adjusted
+                * `SYSTEM_ERROR_1` - Teasers and TeaserLegs have only one generic SystemError (not 1, 2, 3) which can be anything from DB error to the error we could not map or Undefined. In this case it maps to SystemError
+                * `SYSTEM_ERROR_2` - Teasers and TeaserLegs have only one generic SystemError (not 1, 2, 3) which can be anything from DB error to the error we could not map or Undefined. In this case it maps to Undefined
+                * `UNKNOWN` - An unknown error has occured
+                * `WAGER_DATA_MISSING` - Wager is denied due to insufficient information available for validation
+              enum:
+                - CANNOT_TEASER_LIVE_GAME
+                - CHECK_TEASER_ERROR
+                - INVALID_EVENT
+                - INVALID_LEG_BET
+                - INVALID_LEG_BET_TYPE
+                - LINE_CHANGED
+                - LINE_DOES_NOT_BELONG_TO_EVENT
+                - OFFLINE_EVENT
+                - PAST_CUTOFFTIME
+                - POINTS_ARE_NOT_ADJUSTED
+                - SYSTEM_ERROR_1
+                - SYSTEM_ERROR_2
+                - UNKNOWN
+                - WAGER_DATA_MISSING
+            legId:
+              type: string
+              description: Client genereated GUID that was provided in request.
+      validLegs:
+        type: array
+        description: Collection of ValidLeg
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                Status will always be PLACE_TEASER_BET_LEG_STATUS.VALID
+
+                * `VALID` - Teaser is valid.
+              enum:
+                - VALID
+            legId:
+              type: string
+              description: Client genereated GUID that was provided in request.
+            lineId:
+              type: integer
+              format: int64
+              description: Unique identifier.
+            points:
+              type: number
+              format: float
+              description: Number of points
+  PlaceSpecialBetResponse:
+    type: object
+    properties:
+      bets:
+        type: array
+        description: A list of special bets
+        items:
+          type: object
+          properties:
+            status:
+              type: string
+              description: |
+                * `ACCEPTED` - Accepted
+                * `PROCESSED_WITH_ERROR` - Processed with error
+              enum:
+                - ACCEPTED
+                - PROCESSED_WITH_ERROR
+            errorCode:
+              type: string
+              description: |
+                If Status is PROCESSED_WITH_ERROR, errorCode will be in the response
+
+                * `ALL_BETTING_CLOSED` - Betting is not allowed at this moment. This may happen during system maintenance.
+                * `ABOVE_MAX_BET_AMOUNT` - Stake is above allowed maximum amount
+                * `BELOW_MIN_BET_AMOUNT` - Stake is below allowed minimum amount
+                * `BLOCKED_BETTING` - Customer is an agent
+                * `BLOCKED_CLIENT` - Client is no longer active
+                * `INSUFFICIENT_FUNDS` - Bet is submitted by a client with insufficient funds
+                * `INVALID_COUNTRY` - Client country is not allowed for betting
+                * `LINE_CHANGED` - Bet is submitted on a line that has changed
+                * `PAST_CUTOFFTIME` - Bet is submitted on a game after the betting cutoff time
+                * `SYSTEM_ERROR_1` - Unexpected error or System error
+                * `SYSTEM_ERROR_2` - Unexpected error or System error
+                * `RESUBMIT_REQUEST` - The ticket hast to be resubmitted
+                * `DUPLICATE_UNIQUE_REQUEST_ID` - UniqueRequestId must be inque for each bet
+                * `INVALID_REQUEST` - Special bet request is not valid
+                * `UNIQUE_REQUEST_ID_REQUIRED` - UniqueRequestId is missing
+                * `RESPONSIBLE_BETTING_RISK_LIMIT_EXCEEDED` - Self-imposed risk limit exceeded
+                * `RESPONSIBLE_BETTING_LOSS_LIMIT_EXCEEDED` - Self-imposed loss limit exceeded
+                * `INCOMPLETE_CUSTOMER_BETTING_PROFILE` - Customer profile could not be loaded, please contact CSD
+                * `WAGERING_SUSPENDED` - The customer wagering is suspended
+                * `CONTEST_NOT_FOUND` - Incorrect contest id provided or contest is no longer available
+                * `CONTEST_FUNCTIONALITY_IS_DISABLED` - Contest functionality is disabled
+              enum:
+                - ALL_BETTING_CLOSED
+                - ABOVE_MAX_BET_AMOUNT
+                - BELOW_MIN_BET_AMOUNT
+                - BLOCKED_BETTING
+                - BLOCKED_CLIENT
+                - INSUFFICIENT_FUNDS
+                - INVALID_COUNTRY
+                - LINE_CHANGED
+                - PAST_CUTOFFTIME
+                - SYSTEM_ERROR_1
+                - SYSTEM_ERROR_2
+                - RESUBMIT_REQUEST
+                - DUPLICATE_UNIQUE_REQUEST_ID
+                - INVALID_REQUEST
+                - UNIQUE_REQUEST_ID_REQUIRED
+                - RESPONSIBLE_BETTING_RISK_LIMIT_EXCEEDED
+                - RESPONSIBLE_BETTING_LOSS_LIMIT_EXCEEDED
+                - INCOMPLETE_CUSTOMER_BETTING_PROFILE
+                - WAGERING_SUSPENDED
+                - CONTEST_NOT_FOUND
+                - CONTEST_FUNCTIONALITY_IS_DISABLED
+            betId:
+              type: integer
+              format: int64
+              description: The bet ID of the new bet. May be empty on failure.
+            uniqueRequestId:
+              type: string
+              description: Echo of the uniqueRequestId from the request.
+            betterLineWasAccepted:
+              type: boolean
+              description: |
+                Whether or not the bet was accepted on the line that changed in favour of client.
+                This can be true only if acceptBetterLine in the Place Bet request is set to TRUE.
+  GetBetsResponse:
+    type: object
+    properties:
+      bets:
+        type: array
+        description: Response returns array of Straight Bet type, Parlay Bet types, Teaser Bet Types and Special Bet Types
+        items:
+          type: object
+          properties:
+            betId:
+              type: integer
+              format: int64
+              description: The bet ID of the new bet. May be empty on failure.
+            wagerNumber:
+              type: integer
+              format: int32
+              description: |
+                Wager identification. All bets placed thru the API will have value 1.
+                Website supports multiple bets (wagers) placement in the same bet slip.
+                In that case the bet would have appropriate wager number.
+            placedAt:
+              type: string
+              format: date-time
+              description: Date time when the bet was placed
+            win:
+              type: number
+              format: float
+              description: Win amount
+            risk:
+              type: number
+              format: float
+              description: Risk amount
+            winLoss:
+              type: number
+              format: float
+              description: Win-Loss for settled bets
+            betStatus:
+              type: string
+              description: |
+                * `ACCEPTED` - Bet was accepted.
+                * `CANCELLED` - Bet is cancelled as per Pinnacle Sports betting rules. This may happen only before the event was settled.
+                * `LOSE` - The bet is settled as lose. Parlay bets: The parlay bet has at least one leg that with legBetStatus =LOSE and it’s really lose, not push-lose (see LEG_BET_STATUS). In this case winLoss = -risk
+                * `PENDING_ACCEPTANCE` - This status is reserved only for live bets. If a live bet is placed during danger zone or live delay is applied, it will be in PENDING_ACCEPTANCE , otherwise in ACCEPTED status. From this status bet can go to ACCEPTED or REJECTED status.
+                * `REFUNDED` - When an event is cancelled or when the bet is settled as push, the bet will have REFUNDED status.
+                * `REJECTED` - Bet was rejected. Bet can be rejected only if it was previously in PENDING_ACCEPTANCE status.
+                * `WON` - The bet is settled as won. Parlay bets: In this case all legs must be either won, push-won, push-lose, or regular push (see LEG_BET_STATUS).  In this case winLoss can be still be less than zero in case one of the legs was push-lose. If all the legs have legBetStatus = Won,  than the winLoss will be greater than zero.
+              enum:
+                - ACCEPTED
+                - CANCELLED
+                - LOSE
+                - PENDING_ACCEPTANCE
+                - REFUNDED
+                - REJECTED
+                - WON
+            betType:
+              type: string
+              description: ""
+              enum:
+                - MONEYLINE
+                - TEAM_TOTAL_POINTS
+                - SPREAD
+                - TOTAL_POINTS
+                - SPECIAL
+            sportId:
+              type: integer
+              format: int32
+              description: ""
+            leagueId:
+              type: integer
+              format: int64
+              description: ""
+            eventId:
+              type: integer
+              format: int64
+              description: ""
+            handicap:
+              type: number
+              format: float
+              description: Handicap that the bet was placed on
+            price:
+              type: number
+              format: float
+              description: Price that the bet was placed on
+            teamName:
+              type: string
+              description: Team name. If the bet was placed on moneyline draw side, the value will be Draw
+            side:
+              type: string
+              description: ""
+              enum:
+                - OVER
+                - UNDER
+            oddsFormat:
+              type: string
+              description: Bet odds format.
+              enum:
+                - AMERICAN
+                - DECIMAL
+                - HONGKONG
+                - INDONESIAN
+                - MALAY
+            customerCommission:
+              type: number
+              format: float
+              description: Client’s commission on the bet
+            pitcher1:
+              type: string
+              description: Team1 pitcher name. Baseball only.
+            pitcher2:
+              type: string
+              description: Team2 pitcher name. Baseball only.
+            pitcher1MustStart:
+              type: boolean
+              description: Whether the team1 pitcher must start in order for bet to take action. Baseball only
+            pitcher2MustStart:
+              type: boolean
+              description: Whether the team2 pitcher must start in order for bet to take action. Baseball only
+            team1:
+              type: string
+              description: Team 1 name
+            team2:
+              type: string
+              description: Team 2 name
+            isLive:
+              type: boolean
+              description: Whether the bet is on live event
+            periodNumber:
+              type: integer
+              format: int32
+              description: Period number that the bet was placed on
+            team1Score:
+              type: number
+              format: float
+              description: Team 1 score that the bet was placed on
+            team2Score:
+              type: number
+              format: float
+              description: Team 2 score that the bet was placed on
+            ftTeam1Score:
+              type: number
+              format: float
+              description: Full time team 1 score
+            ftTeam2Score:
+              type: number
+              format: float
+              description: Full time team 2 score
+            pTeam1Score:
+              type: number
+              format: float
+              description: End of period team 1 score. If the bet was placed on Game period (periodNumber =0) , this will be null
+            pTeam2Score:
+              type: number
+              format: float
+              description: End of period team 2 score. If the bet was placed on Game period (periodNumber =0) , this will be null
+            teaserName:
+              type: string
+              description: Name of the teaser.
+            isSameEventOnly:
+              type: boolean
+              description: true when all legs must be from the same event; otherwise false
+            minPicks:
+              type: integer
+              format: int32
+              description: Minimum number of legs required for teaser
+            maxPicks:
+              type: integer
+              format: int32
+              description: Maximum number of legs required for teaser
+            specialId:
+              type: integer
+              format: int64
+              description: id of the special
+            contestantId:
+              type: integer
+              format: int64
+              description: id of the contestant
+            contestantName:
+              type: string
+              description: name of the contestant
+            Legs:
+              type: array
+              description: List of legs
+              items:
+                type: object
+                properties:
+                  sportId:
+                    type: integer
+                    format: int32
+                    description: ""
+                  leagueId:
+                    type: integer
+                    format: int64
+                    description: ""
+                  eventId:
+                    type: integer
+                    format: int64
+                    description: ""
+                  legBetStatus:
+                    type: string
+                    description: |
+                      * `CANCELLED` - The leg is canceled- the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `LOSE` - The leg is a loss or a push-lose. When Push-lose happens, the half of the stake on the leg will be pushed to the next leg, and the other half will be a lose. This can happen only when the leg is placed on a quarter points handicap.
+                      * `PUSH` - The leg is a push - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `REFUNDED` - The leg is refunded - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `REJECTED` - The leg is rejected - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `WON` - The leg is a won or a push-won. When Push-won happens, the half of the stake on the leg will be pushed to the next leg, and the other half is won. This can happen only when the leg is placed on a quarter points handicap.
+                    enum:
+                      - CANCELLED
+                      - LOSE
+                      - PUSH
+                      - REFUNDED
+                      - REJECTED
+                      - WON
+                  legBetType:
+                    type: string
+                    description: Can be SPREAD, MONEYLINE or TOTAL_POINTS
+                    enum:
+                      - MONEYLINE
+                      - SPREAD
+                      - TOTAL_POINTS
+                  handicap:
+                    type: number
+                    format: float
+                    description: Handicap that the bet was placed on
+                  price:
+                    type: number
+                    format: float
+                    description: Price that the bet was placed on
+                  teamName:
+                    type: string
+                    description: Team name. If the bet was placed on moneyline draw side, the value will be Draw
+                  side:
+                    type: string
+                    description: ""
+                    enum:
+                      - OVER
+                      - UNDER
+                  pitcher1:
+                    type: string
+                    description: Team1 pitcher name. Baseball only.
+                  pitcher2:
+                    type: string
+                    description: Team2 pitcher name. Baseball only.
+                  pitcher1MustStart:
+                    type: boolean
+                    description: Whether the team1 pitcher must start in order for bet to take action. Baseball only
+                  pitcher2MustStart:
+                    type: boolean
+                    description: Whether the team2 pitcher must start in order for bet to take action. Baseball only
+                  team1:
+                    type: string
+                    description: Team 1 name
+                  team2:
+                    type: string
+                    description: Team 2 name
+                  isLive:
+                    type: boolean
+                    description: Whether the bet is on live event
+                  periodNumber:
+                    type: integer
+                    format: int32
+                    description: Period number that the bet was placed on
+                  team1Score:
+                    type: number
+                    format: float
+                    description: Team 1 score that the bet was placed on
+                  team2Score:
+                    type: number
+                    format: float
+                    description: Team 2 score that the bet was placed on
+                  ftTeam1Score:
+                    type: number
+                    format: float
+                    description: Full time team 1 score
+                  ftTeam2Score:
+                    type: number
+                    format: float
+                    description: Full time team 2 score
+                  pTeam1Score:
+                    type: number
+                    format: float
+                    description: End of period team 1 score. If the bet was placed on Game period (periodNumber =0) , this will be null
+                  pTeam2Score:
+                    type: number
+                    format: float
+                    description: End of period team 2 score. If the bet was placed on Game period (periodNumber =0) , this will be null
+            legs:
+              type: array
+              description: A collection of Leg
+              items:
+                type: object
+                properties:
+                  legBetStatus:
+                    type: string
+                    description: |
+                      * `CANCELLED` - The leg is canceled- the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `LOSE` - The leg is a loss or a push-lose. When Push-lose happens, the half of the stake on the leg will be pushed to the next leg, and the other half will be a lose. This can happen only when the leg is placed on a quarter points handicap.
+                      * `PUSH` - The leg is a push - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `REFUNDED` - The leg is refunded - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `REJECTED` - The leg is rejected - the stake on this leg will be transferred to the next one. In this case the leg will be ignored when calculating the winLoss.
+                      * `WON` - The leg is a won or a push-won. When Push-won happens, the half of the stake on the leg will be pushed to the next leg, and the other half is won. This can happen only when the leg is placed on a quarter points handicap.
+                    enum:
+                      - CANCELLED
+                      - LOSE
+                      - PUSH
+                      - REFUNDED
+                      - REJECTED
+                      - WON
+                  legBetType:
+                    type: string
+                    description: Can be SPREAD, MONEYLINE or TOTAL_POINTS
+                    enum:
+                      - MONEYLINE
+                      - SPREAD
+                      - TOTAL_POINTS
+                  eventId:
+                    type: integer
+                    format: int64
+                    description: ""
+                  eventStartTime:
+                    type: string
+                    format: date-time
+                    description: ""
+                  sportId:
+                    type: integer
+                    format: int32
+                    description: ""
+                  leagueId:
+                    type: integer
+                    format: int64
+                    description: ""
+                  handicap:
+                    type: number
+                    format: float
+                    description: Handicap that the bet was placed on
+                  teamName:
+                    type: string
+                    description: Team name. If the bet was placed on moneyline draw side, the value will be Draw
+                  side:
+                    type: string
+                    description: ""
+                    enum:
+                      - OVER
+                      - UNDER
+                  team1:
+                    type: string
+                    description: Team 1 name
+                  team2:
+                    type: string
+                    description: Team 2 name
+                  periodNumber:
+                    type: integer
+                    format: int32
+                    description: Period number that the bet was placed on
