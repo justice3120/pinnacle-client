@@ -1307,6 +1307,23 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetTranslationsResponse'
+  /periods:
+    get:
+      summary: Returns periods for the sport.
+      tags:
+        - Periods
+      parameters:
+        - name: sportId
+          in: query
+          description: The sport id.
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetPeriodsResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -3355,3 +3372,38 @@ definitions:
                   text:
                     type: string
                     description: Translation text
+  GetPeriodsResponse:
+    type: object
+    properties:
+      periods:
+        type: array
+        items:
+          type: object
+          properties:
+            number:
+              type: integer
+              format: int32
+            description:
+              type: string
+            shortDescription:
+              type: string
+            spreadDescription:
+              type: string
+            moneylineDescription:
+              type: string
+            totalDescription:
+              type: string
+            team1TotalDescription:
+              type: string
+            team2TotalDescription:
+              type: string
+            spreadShortDescription:
+              type: string
+            moneylineShortDescription:
+              type: string
+            totalShortDescription:
+              type: string
+            team1TotalShortDescription:
+              type: string
+            team2TotalShortDescription:
+              type: string
