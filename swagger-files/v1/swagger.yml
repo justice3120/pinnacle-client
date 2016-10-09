@@ -1222,6 +1222,16 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetBetsResponse'
+  /inrunning:
+    get:
+      summary: Returns all soccer events that have a live status associated with them and have a status that indicates the game is in progress.
+      tags:
+        - Inrunning
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetInrunningResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -3187,3 +3197,64 @@ definitions:
                     type: integer
                     format: int32
                     description: Period number that the bet was placed on
+  GetInrunningResponse:
+    type: object
+    properties:
+      sports:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+            leagues:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          description: The event id
+                        state:
+                          type: integer
+                          format: int32
+                          description: |
+                            The state of the live event
+
+                            * `1` - First half in progress
+                            * `2` - Half time in progress
+                            * `3` - Second half in progress
+                            * `4` - End of regular time
+                            * `5` - First half extra time in progress
+                            * `6` - Extra time half time in progress
+                            * `7` - Second half extra time in progress
+                            * `8` - End of extra time
+                            * `9` - End of Game
+                            * `10` - Game is temporary suspended
+                            * `11` - Penalties in progress
+                          enum:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                            - 7
+                            - 8
+                            - 9
+                            - 10
+                            - 11
+                        elapsed:
+                          type: integer
+                          format: int32
+                          description: Minutes elapsed since start of the state . Please note that this will be 0 when the match is in half time
