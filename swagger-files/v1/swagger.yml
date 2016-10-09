@@ -1232,6 +1232,81 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/GetInrunningResponse'
+  /translations:
+    get:
+      summary: Returns translations for supplied strings based on supplied cultures.
+      description: |
+        Must provide one or multiple baseTexts values to be translated.
+        Must provide one or multiple culture values.
+      tags:
+        - Translations
+      parameters:
+        - name: cultureCodes
+          in: query
+          description: |
+            Must be in "Language Culture Name" format
+
+            * `en-US` - English
+            * `en-GB` - British
+            * `zh-CN` - ChineseSI
+            * `zh-TW` - ChineseTR
+            * `fi-FI` - Finnish
+            * `de-DE` - German
+            * `he-IL` - Hebrew
+            * `it-IT` - Italian
+            * `nb-NO` - Norwegian
+            * `pt-BR` - Portuguese
+            * `ru-RU` - Russian
+            * `es-ES` - Spanish
+            * `sv-SE` - Swedish
+            * `th-TH` - Thai
+            * `pl-PL` - Polish
+            * `fr-FR` - French
+            * `ja-JP` - Japanese
+            * `ko-KR` - Korean
+            * `vi-VN` - Vietnamese
+            * `id-ID` - Indonesian
+            * `cs-CZ` - Czech
+          required: true
+          type: array
+          collectionFormat: pipes
+          items:
+            type: string
+            enum:
+              - en-US
+              - en-GB
+              - zh-CN
+              - zh-TW
+              - fi-FI
+              - de-DE
+              - he-IL
+              - it-IT
+              - nb-NO
+              - pt-BR
+              - ru-RU
+              - es-ES
+              - sv-SE
+              - th-TH
+              - pl-PL
+              - fr-FR
+              - ja-JP
+              - ko-KR
+              - vi-VN
+              - id-ID
+              - cs-CZ
+        - name: baseTexts
+          in: query
+          description: Array of strings to be translated
+          required: true
+          type: array
+          collectionFormat: pipes
+          items:
+            type: string
+      responses:
+        200:
+          description: ""
+          schema:
+            $ref: '#/definitions/GetTranslationsResponse'
 definitions:
   GetFixturesResponse:
     type: object
@@ -3258,3 +3333,25 @@ definitions:
                           type: integer
                           format: int32
                           description: Minutes elapsed since start of the state . Please note that this will be 0 when the match is in half time
+  GetTranslationsResponse:
+    type: object
+    properties:
+      translations:
+        type: array
+        items:
+          type: object
+          properties:
+            text:
+              type: string
+              description: Original requested text to be translated
+            cultures:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Culture based on which the text is translated
+                  text:
+                    type: string
+                    description: Translation text
